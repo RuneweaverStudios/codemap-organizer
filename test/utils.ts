@@ -1,17 +1,12 @@
 /*
  * Path: /Users/ghost/Desktop/codemap/codemap-organizer/test/utils.ts
- * Module: test/utils
- * Purpose: Test utility functions for token counting, timing, and file operations
- * Dependencies: fs, path, child_process
- * Related: ./benchmark.ts, ./spec.ts
- * Keywords: utils, token-count, timing, file-operations, testing
- * Last Updated: 2026-03-24
+ * Module: test
+ * Purpose: * Token Counter Utilities
+ * Dependencies: 
+ * Related: 
+ * Keywords: utils, users, ghost, desktop, codemap, codemap-organizer, test, utils.ts, accuracyresult, memocache
+ * Last Updated: 2026-03-25
  */
-
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 

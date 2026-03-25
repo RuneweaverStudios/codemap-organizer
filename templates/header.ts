@@ -16,7 +16,7 @@
  */
 
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'fs';
-import { join, relative, extname, basename } from 'path';
+import { join, relative, extname, basename, dirname } from 'path';
 
 interface HeaderData {
   path: string;
@@ -128,26 +128,64 @@ function extractPurpose(content: string, filePath: string): string {
     return `Worker processor - ${fileName}`;
   }
 
-  // Default: Try to find in content
+  // IMPROVED: Analyze code exports and structure
   const lines = content.split('\n');
-  const firstLines = lines.slice(0, 10).join(' ');
 
-  const purposePatterns = [
-    /(?:\/\/|\/\*\*|#)[\s\*]*([A-Z][^.!?]*[.!?])/i,
-    /(?:exports|default export|export const|export function)\s+(\w+)/,
-    /class\s+(\w+)/,
-    /function\s+(\w+)/,
-    /interface\s+(\w+)/,
-    /type\s+(\w+)/,
-  ];
-
-  for (const pattern of purposePatterns) {
-    const match = firstLines.match(pattern);
-    if (match) {
-      return `${match[1] || fileName} - ${extractFromFileNaming(filePath)}`;
+  // Look for leading comments/docstrings
+  const firstComment = lines.slice(0, 15).join('\n').match(/\/\*\*([\s\S]*?)\*\//);
+  if (firstComment) {
+    const desc = firstComment[1].trim().split('\n')[0];
+    if (desc.length > 10 && desc.length < 100) {
+      return desc;
     }
   }
 
+  // Look for main exports
+  const exportPatterns = [
+    /export\s+(class|interface|type|function|const)\s+(\w+)/g,
+    /export\s+default\s+(class|function|\w+)/g,
+  ];
+
+  const exports: string[] = [];
+  for (const pattern of exportPatterns) {
+    let match;
+    while ((match = pattern.exec(content)) !== null) {
+      exports.push(match[2] || match[1]);
+    }
+  }
+
+  // If we have clear exports, use them to build purpose
+  if (exports.length > 0 && exports.length <= 5) {
+    const uniqueExports = [...new Set(exports)];
+    if (uniqueExports.length === 1) {
+      return `${uniqueExports[0]} module`;
+    } else if (uniqueExports.length <= 3) {
+      return `${uniqueExports.join(', ')} modules`;
+    }
+  }
+
+  // Look for class/function definitions as fallback
+  const definitionPatterns = [
+    /class\s+(\w+)/g,
+    /function\s+(\w+)\s*\(/g,
+    /interface\s+(\w+)/g,
+    /type\s+(\w+)\s*=/g,
+  ];
+
+  const definitions: string[] = [];
+  for (const pattern of definitionPatterns) {
+    let match;
+    while ((match = pattern.exec(content)) !== null) {
+      definitions.push(match[1]);
+    }
+  }
+
+  if (definitions.length > 0 && definitions.length <= 3) {
+    const topDefs = [...new Set(definitions)].slice(0, 2);
+    return `${topDefs.join(' and ')}`;
+  }
+
+  // Fallback to file naming
   return extractFromFileNaming(filePath);
 }
 
@@ -189,11 +227,11 @@ function extractDependencies(content: string): { external: string[]; internal: s
   return { external: [...new Set(external)], internal: [...new Set(internal)] };
 }
 
-function extractRelatedFiles(filePath: string, content: string): string[] {
+function extractRelatedFiles(filePath: string, content: string, allFiles?: string[]): string[] {
   const related: string[] = [];
-  const dir = join(filePath, '..');
+  const dir = dirname(filePath);
 
-  // Look for import statements to find related files
+  // Look for import statements to find related files (outbound dependencies)
   const importPatterns = [
     /import\s+.*?\s+from\s+['"](\.\.?\/[^'"]+)['"]/g,
     /require\(['"](\.\.?\/[^'"]+)['"]\)/g,
@@ -202,11 +240,55 @@ function extractRelatedFiles(filePath: string, content: string): string[] {
   for (const pattern of importPatterns) {
     let match;
     while ((match = pattern.exec(content)) !== null) {
-      related.push(match[1]);
+      const importPath = match[1];
+      // Resolve relative paths
+      let resolvedPath: string;
+      if (importPath.startsWith('../')) {
+        const parts = dir.split('/').filter(Boolean);
+        const goUp = importPath.split('../').length - 1;
+        const remaining = importPath.split('../').filter(p => p).join('/');
+        resolvedPath = '/' + [...parts.slice(0, -goUp), remaining].join('/');
+      } else if (importPath.startsWith('./')) {
+        resolvedPath = dir + '/' + importPath.slice(2);
+      } else {
+        resolvedPath = '/' + importPath;
+      }
+      related.push(resolvedPath);
     }
   }
 
-  return [...new Set(related)].slice(0, 5); // Limit to 5 related files
+  // If all files provided, also find files that import this file (inbound dependencies)
+  // Only do this if we have the file list (expensive operation)
+  if (allFiles && allFiles.length > 0) {
+    const fileName = basename(filePath);
+    const fileBaseName = fileName.replace(/\.(ts|tsx|js|jsx|py|go|rs)$/, '');
+
+    // This is a simple heuristic - in production would use AST parsing
+    for (const otherFile of allFiles) {
+      if (otherFile === filePath) continue;
+
+      try {
+        const otherContent = readFileSync(otherFile, 'utf-8');
+        // Check if other file imports this one
+        const importsThis = (
+          otherContent.includes(`from '${filePath}'`) ||
+          otherContent.includes(`from "${filePath}"`) ||
+          otherContent.includes(`from './${fileName}'`) ||
+          otherContent.includes(`from "../${fileName}"`) ||
+          otherContent.includes(`require('${filePath}'`) ||
+          otherContent.includes(`require("${filePath}"`)
+        );
+
+        if (importsThis) {
+          related.push(otherFile);
+        }
+      } catch {
+        // Skip unreadable files
+      }
+    }
+  }
+
+  return [...new Set(related)].slice(0, 8); // Increased to 8 related files
 }
 
 function extractKeywords(content: string, filePath: string): string[] {
@@ -231,26 +313,44 @@ function extractKeywords(content: string, filePath: string): string[] {
     }
   }
 
-  // Look for common patterns in code
+  // Look for common patterns in code - IMPROVED
   const keywordPatterns = [
-    /interface\s+(\w+)/g,
-    /type\s+(\w+)/g,
-    /class\s+(\w+)/g,
-    /function\s+(\w+)/g,
-    /const\s+(\w+)\s*=/g,
+    // Exported interfaces and types (higher priority)
+    /export\s+(interface|type|class)\s+(\w+)/g,
+    // Public API functions
+    /export\s+(const|function|async\s+function)\s+(\w+)/g,
+    // Non-exported but important (classes, interfaces)
+    /\b(interface|type|class)\s+(\w+)/g,
+    // Functions and constants
+    /\b(function|const)\s+(\w+)\s*(?=\(|=)/g,
   ];
 
   for (const pattern of keywordPatterns) {
     let match;
     while ((match = pattern.exec(content)) !== null) {
-      const word = match[1];
-      if (word.length > 3 && word.length < 30 && /^[A-Z_][a-zA-Z0-9_]*$/.test(word)) {
-        keywords.add(word.toLowerCase());
+      // match[2] is the identifier name in export patterns
+      const word = match[2] || match[1];
+      if (word && word.length > 3 && word.length < 30 && /^[A-Z_][a-zA-Z0-9_]*$/.test(word)) {
+        // Skip common generic words
+        if (!['from', 'import', 'export', 'default', 'return', 'async'].includes(word)) {
+          keywords.add(word.toLowerCase());
+        }
       }
     }
   }
 
-  return Array.from(keywords).slice(0, 8);
+  // Extract from purpose field if already exists
+  const purposeMatch = content.match(/Purpose:\s*([^\n]+)/);
+  if (purposeMatch) {
+    const purposeWords = purposeMatch[1]
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .split(' ')
+      .filter(w => w.length > 3);
+    purposeWords.forEach(w => keywords.add(w));
+  }
+
+  return Array.from(keywords).slice(0, 10);
 }
 
 function generateHeader(data: HeaderData, config: LanguageConfig): string {
@@ -307,7 +407,7 @@ function hasHeader(content: string, config: LanguageConfig): boolean {
   return true;
 }
 
-function processFile(filePath: string, projectRoot: string): boolean {
+function processFile(filePath: string, projectRoot: string, allFiles: string[]): boolean {
   const config = getLanguageConfig(filePath);
   if (!config) return false;
 
@@ -320,7 +420,7 @@ function processFile(filePath: string, projectRoot: string): boolean {
   }
 
   const dependencies = extractDependencies(content);
-  const related = extractRelatedFiles(filePath, content);
+  const related = extractRelatedFiles(filePath, content, allFiles);
   const keywords = extractKeywords(content, filePath);
 
   const headerData: HeaderData = {
@@ -361,15 +461,51 @@ function scanDirectory(dir: string, projectRoot: string, files: string[] = []): 
   return files;
 }
 
-export function addHeaders(root: string = process.cwd()): void {
+export function addHeaders(root: string = process.cwd(), incremental: boolean = false): void {
   console.log(`\n📁 Scanning ${root} for code files...\n`);
 
-  const files = scanDirectory(root, root);
-  console.log(`Found ${files.length} code files\n`);
+  const allFiles = scanDirectory(root, root);
+  let files = allFiles;
+
+  // Incremental mode: only process files without headers or with old headers
+  if (incremental) {
+    const needsUpdate = allFiles.filter(file => {
+      try {
+        const content = readFileSync(file, 'utf-8');
+        const config = getLanguageConfig(file);
+        if (!config) return false;
+
+        // Check if has header
+        if (!hasHeader(content, config)) return true;
+
+        // Check if header is stale (older than 7 days or file modified since)
+        const headerMatch = content.match(/Last Updated:\s*(\d{4}-\d{2}-\d{2})/);
+        if (headerMatch) {
+          const headerDate = new Date(headerMatch[1]);
+          const daysSinceUpdate = (Date.now() - headerDate.getTime()) / (1000 * 60 * 60 * 24);
+
+          const stats = statSync(file);
+          const fileModified = new Date(stats.mtime);
+
+          // Update if header is old or file was modified after header
+          return daysSinceUpdate > 7 || fileModified > headerDate;
+        }
+
+        return false;
+      } catch {
+        return true; // Process on error
+      }
+    });
+
+    files = needsUpdate;
+    console.log(`Incremental mode: ${files.length} of ${allFiles.length} files need updates\n`);
+  }
+
+  console.log(`Found ${files.length} code files to process\n`);
 
   let processed = 0;
   for (const file of files) {
-    if (processFile(file, root)) {
+    if (processFile(file, root, allFiles)) {
       processed++;
     }
   }
@@ -379,6 +515,9 @@ export function addHeaders(root: string = process.cwd()): void {
 
 // CLI entry point
 if (require.main === module) {
-  const root = process.argv[2] || process.cwd();
-  addHeaders(root);
+  const args = process.argv.slice(2);
+  const root = args[0] || process.cwd();
+  const incremental = args.includes('--incremental') || args.includes('-i');
+
+  addHeaders(root, incremental);
 }
