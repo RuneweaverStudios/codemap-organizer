@@ -1,0 +1,61 @@
+{
+  "timestamp": "2026-03-25T03:55:14.194Z",
+  "project": "/Users/ghost/Desktop/codemap/codemap-organizer",
+  "totalFiles": 10,
+  "totalLines": 4778,
+  "results": [
+    {
+      "phase": "baseline",
+      "task": "find-auth",
+      "duration": 7,
+      "tokens": 1500,
+      "filesRead": 3,
+      "accuracy": true
+    },
+    {
+      "phase": "with-skill",
+      "task": "find-auth",
+      "duration": 6,
+      "tokens": 33,
+      "filesRead": 2,
+      "accuracy": true
+    },
+    {
+      "phase": "baseline",
+      "task": "find-routes",
+      "duration": 7,
+      "tokens": 2000,
+      "filesRead": 4,
+      "accuracy": true
+    },
+    {
+      "phase": "with-skill",
+      "task": "find-routes",
+      "duration": 6,
+      "tokens": 17,
+      "filesRead": 1,
+      "accuracy": true
+    },
+    {
+      "phase": "baseline",
+      "task": "edit-file",
+      "duration": 0,
+      "tokens": 3958,
+      "filesRead": 1,
+      "accuracy": true
+    },
+    {
+      "phase": "with-skill",
+      "task": "edit-file",
+      "duration": 0,
+      "tokens": 1187.3999999999999,
+      "filesRead": 1,
+      "accuracy": true
+    }
+  ],
+  "comparison": {
+    "speedup": 14.28571428571429,
+    "tokenReduction": 83.4084204880665,
+    "accuracyImprovement": 0
+  }
+}

@@ -1,0 +1,109 @@
+[
+  {
+    "phase": "baseline",
+    "task": "find-test-files",
+    "duration": 9,
+    "tokens": 5500,
+    "filesFound": [
+      "test/backtest.ts",
+      "test/run-benchmark.ts",
+      "test/utils.ts",
+      "test/benchmark-v2.ts",
+      "test/comparison.ts",
+      "test/spec.ts",
+      "test/baseline-runner.ts",
+      "test/with-skill-runner.ts",
+      "test/benchmark.ts",
+      "scripts/generate-codemaps.ts",
+      "templates/header.ts"
+    ],
+    "precision": 1,
+    "recall": 1,
+    "f1": 1
+  },
+  {
+    "phase": "with-skill",
+    "task": "find-test-files",
+    "duration": 6,
+    "tokens": 270,
+    "filesFound": [
+      "test/backtest.ts",
+      "test/run-benchmark.ts",
+      "test/utils.ts",
+      "test/benchmark-v2.ts",
+      "test/comparison.ts",
+      "test/spec.ts",
+      "test/baseline-runner.ts",
+      "test/with-skill-runner.ts",
+      "test/benchmark.ts"
+    ],
+    "precision": 1,
+    "recall": 1,
+    "f1": 1
+  },
+  {
+    "phase": "baseline",
+    "task": "find-generator-scripts",
+    "duration": 6,
+    "tokens": 3500,
+    "filesFound": [
+      "test/backtest.ts",
+      "test/run-benchmark.ts",
+      "test/benchmark-v2.ts",
+      "test/comparison.ts",
+      "test/spec.ts",
+      "scripts/generate-codemaps.ts",
+      "templates/header.ts"
+    ],
+    "precision": 0.2857142857142857,
+    "recall": 1,
+    "f1": 0.4444444444444445
+  },
+  {
+    "phase": "with-skill",
+    "task": "find-generator-scripts",
+    "duration": 8,
+    "tokens": 90,
+    "filesFound": [
+      "test/benchmark-v2.ts",
+      "scripts/generate-codemaps.ts",
+      "templates/header.ts"
+    ],
+    "precision": 0.6666666666666666,
+    "recall": 1,
+    "f1": 0.8
+  },
+  {
+    "phase": "baseline",
+    "task": "find-utility-files",
+    "duration": 5,
+    "tokens": 4000,
+    "filesFound": [
+      "test/backtest.ts",
+      "test/utils.ts",
+      "test/benchmark-v2.ts",
+      "test/spec.ts",
+      "test/baseline-runner.ts",
+      "test/with-skill-runner.ts",
+      "test/benchmark.ts",
+      "templates/header.ts"
+    ],
+    "precision": 0.14285714285714285,
+    "recall": 0.5,
+    "f1": 0.22222222222222224
+  },
+  {
+    "phase": "with-skill",
+    "task": "find-utility-files",
+    "duration": 8,
+    "tokens": 90,
+    "filesFound": [
+      "test/backtest.ts",
+      "test/utils.ts",
+      "test/benchmark-v2.ts"
+    ],
+    "precision": 0.3333333333333333,
+    "recall": 0.5,
+    "f1": 0.4
+  }
+]
