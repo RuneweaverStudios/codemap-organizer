@@ -45,8 +45,16 @@ const LANGUAGE_CONFIGS: Record<string, LanguageConfig> = {
   '.java': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
   '.c': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
   '.cpp': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
+  '.cc': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
   '.h': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
   '.hpp': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
+  '.swift': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
+  '.kt': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
+  '.kts': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
+  '.cs': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
+  '.dart': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
+  '.rb': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
+  '.php': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
 
   // Python docstring style
   '.py': { headerStart: '"""', headerEnd: '"""', linePrefix: '', commentStyle: 'doc' },
@@ -60,6 +68,9 @@ const LANGUAGE_CONFIGS: Record<string, LanguageConfig> = {
   '.bash': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
   '.zsh': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
   '.fish': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
+  '.ps1': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
+  '.yaml': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
+  '.yml': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
 };
 
 const EXCLUDED_DIRS = new Set([
@@ -205,12 +216,12 @@ function extractDependencies(content: string): { external: string[]; internal: s
   const internal: string[] = [];
 
   // TypeScript/JavaScript imports
-  const importPatterns = [
+  const jsImportPatterns = [
     /import\s+.*?\s+from\s+['"]([^./][^'"]*)['"]/g,
     /require\(['"]([^./][^'"]*)['"]\)/g,
   ];
 
-  for (const pattern of importPatterns) {
+  for (const pattern of jsImportPatterns) {
     let match;
     while ((match = pattern.exec(content)) !== null) {
       external.push(match[1]);
@@ -222,6 +233,53 @@ function extractDependencies(content: string): { external: string[]; internal: s
   let pyMatch;
   while ((pyMatch = pyImportPattern.exec(content)) !== null) {
     external.push(pyMatch[1]);
+  }
+
+  // Swift imports
+  const swiftImportPatterns = [
+    /import\s+(\w+)/g,
+    /@import\s+(\w+)/g,
+  ];
+  for (const pattern of swiftImportPatterns) {
+    let match;
+    while ((match = pattern.exec(content)) !== null) {
+      external.push(match[1]);
+    }
+  }
+
+  // Rust imports (use, extern crate)
+  const rustImportPatterns = [
+    /use\s+([^;]+);/g,
+    /extern\s+crate\s+(\w+)/g,
+    /mod\s+(\w+);/g,
+  ];
+  for (const pattern of rustImportPatterns) {
+    let match;
+    while ((match = pattern.exec(content)) !== null) {
+      external.push(match[1].trim());
+    }
+  }
+
+  // Go imports
+  const goImportPattern = /import\s+(?:"([^"]+)"\s+)?(\w+)/g;
+  let goMatch;
+  while ((goMatch = goImportPattern.exec(content)) !== null) {
+    if (goMatch[1]) external.push(goMatch[1]);
+    if (goMatch[2]) external.push(goMatch[2]);
+  }
+
+  // Ruby requires
+  const rubyRequirePattern = /require\s+['"]([^'"]+)['"]/g;
+  let rubyMatch;
+  while ((rubyMatch = rubyRequirePattern.exec(content)) !== null) {
+    external.push(rubyMatch[1]);
+  }
+
+  // C# using
+  const csharpUsingPattern = /using\s+([^;]+);/g;
+  let csharpMatch;
+  while ((csharpMatch = csharpUsingPattern.exec(content)) !== null) {
+    external.push(csharpMatch[1].trim());
   }
 
   return { external: [...new Set(external)], internal: [...new Set(internal)] };
@@ -261,7 +319,8 @@ function extractRelatedFiles(filePath: string, content: string, allFiles?: strin
   // Only do this if we have the file list (expensive operation)
   if (allFiles && allFiles.length > 0) {
     const fileName = basename(filePath);
-    const fileBaseName = fileName.replace(/\.(ts|tsx|js|jsx|py|go|rs)$/, '');
+    const fileBaseName = fileName.replace(/\.(ts|tsx|js|jsx|py|go|rs|swift)$/, '');
+    const ext = extname(fileName);
 
     // This is a simple heuristic - in production would use AST parsing
     for (const otherFile of allFiles) {
@@ -276,7 +335,8 @@ function extractRelatedFiles(filePath: string, content: string, allFiles?: strin
           otherContent.includes(`from './${fileName}'`) ||
           otherContent.includes(`from "../${fileName}"`) ||
           otherContent.includes(`require('${filePath}'`) ||
-          otherContent.includes(`require("${filePath}"`)
+          otherContent.includes(`require("${filePath}"`) ||
+          otherContent.includes(`import ${fileBaseName}`)  // Swift
         );
 
         if (importsThis) {

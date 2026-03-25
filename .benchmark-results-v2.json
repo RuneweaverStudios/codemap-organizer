@@ -2,7 +2,7 @@
   {
     "phase": "baseline",
     "task": "find-test-files",
-    "duration": 9,
+    "duration": 22,
     "tokens": 5500,
     "filesFound": [
       "test/backtest.ts",
@@ -24,7 +24,7 @@
   {
     "phase": "with-skill",
     "task": "find-test-files",
-    "duration": 6,
+    "duration": 22,
     "tokens": 270,
     "filesFound": [
       "test/backtest.ts",
@@ -44,7 +44,7 @@
   {
     "phase": "baseline",
     "task": "find-generator-scripts",
-    "duration": 6,
+    "duration": 25,
     "tokens": 3500,
     "filesFound": [
       "test/backtest.ts",
@@ -62,7 +62,7 @@
   {
     "phase": "with-skill",
     "task": "find-generator-scripts",
-    "duration": 8,
+    "duration": 24,
     "tokens": 90,
     "filesFound": [
       "test/benchmark-v2.ts",
@@ -76,7 +76,7 @@
   {
     "phase": "baseline",
     "task": "find-utility-files",
-    "duration": 5,
+    "duration": 18,
     "tokens": 4000,
     "filesFound": [
       "test/backtest.ts",
@@ -95,7 +95,7 @@
   {
     "phase": "with-skill",
     "task": "find-utility-files",
-    "duration": 8,
+    "duration": 16,
     "tokens": 90,
     "filesFound": [
       "test/backtest.ts",
