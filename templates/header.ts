@@ -53,17 +53,22 @@ const LANGUAGE_CONFIGS: Record<string, LanguageConfig> = {
   '.kts': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
   '.cs': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
   '.dart': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
-  '.rb': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
   '.php': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
+  '.scala': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
+  '.groovy': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
+  '.css': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
+  '.scss': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
+  '.less': { headerStart: '/*', headerEnd: ' */', linePrefix: ' * ', commentStyle: 'block' },
 
   // Python docstring style
   '.py': { headerStart: '"""', headerEnd: '"""', linePrefix: '', commentStyle: 'doc' },
   '.pyi': { headerStart: '"""', headerEnd: '"""', linePrefix: '', commentStyle: 'doc' },
 
   // Rust doc style
-  '.rs': { headerStart: '//!', headerEnd: '', linePrefix: '! ', commentStyle: 'line' },
+  '.rs': { headerStart: '//!', headerEnd: '', linePrefix: '//! ', commentStyle: 'line' },
 
-  // Line comment styles
+  // Line comment styles (hash)
+  '.rb': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
   '.sh': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
   '.bash': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
   '.zsh': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
@@ -71,6 +76,36 @@ const LANGUAGE_CONFIGS: Record<string, LanguageConfig> = {
   '.ps1': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
   '.yaml': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
   '.yml': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
+  '.toml': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
+  '.r': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
+  '.R': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
+  '.ex': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
+  '.exs': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
+  '.nim': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
+  '.tf': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
+  '.dockerfile': { headerStart: '#', headerEnd: '', linePrefix: '# ', commentStyle: 'line' },
+
+  // Line comment styles (double dash)
+  '.lua': { headerStart: '--', headerEnd: '', linePrefix: '-- ', commentStyle: 'line' },
+  '.sql': { headerStart: '--', headerEnd: '', linePrefix: '-- ', commentStyle: 'line' },
+  '.hs': { headerStart: '--', headerEnd: '', linePrefix: '-- ', commentStyle: 'line' },
+  '.elm': { headerStart: '--', headerEnd: '', linePrefix: '-- ', commentStyle: 'line' },
+
+  // Line comment styles (double slash)
+  '.zig': { headerStart: '//', headerEnd: '', linePrefix: '// ', commentStyle: 'line' },
+
+  // Line comment styles (semicolon)
+  '.clj': { headerStart: ';;', headerEnd: '', linePrefix: ';; ', commentStyle: 'line' },
+  '.cljs': { headerStart: ';;', headerEnd: '', linePrefix: ';; ', commentStyle: 'line' },
+  '.el': { headerStart: ';;', headerEnd: '', linePrefix: ';; ', commentStyle: 'line' },
+
+  // Line comment styles (percent)
+  '.erl': { headerStart: '%', headerEnd: '', linePrefix: '% ', commentStyle: 'line' },
+
+  // HTML-style comments
+  '.html': { headerStart: '<!--', headerEnd: '-->', linePrefix: '  ', commentStyle: 'block' },
+  '.vue': { headerStart: '<!--', headerEnd: '-->', linePrefix: '  ', commentStyle: 'block' },
+  '.svelte': { headerStart: '<!--', headerEnd: '-->', linePrefix: '  ', commentStyle: 'block' },
 };
 
 const EXCLUDED_DIRS = new Set([

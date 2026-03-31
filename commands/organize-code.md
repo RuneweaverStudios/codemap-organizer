@@ -20,9 +20,23 @@ Add structured file headers to all code files AND regenerate CODEMAPS.
 - TypeScript/JavaScript (.ts, .tsx, .js, .jsx)
 - Python (.py, .pyi)
 - Go (.go)
-- Rust (.rs)
+- Rust (.rs) - uses `//!` doc comments
 - Java (.java)
-- C/C++ (.c, .cpp, .h, .hpp)
+- C/C++ (.c, .cpp, .cc, .h, .hpp)
+- Swift (.swift), Kotlin (.kt, .kts), Dart (.dart)
+- C# (.cs), Scala (.scala), Groovy (.groovy)
+- Ruby (.rb) - uses `#` line comments
+- PHP (.php)
+- Lua (.lua), SQL (.sql) - uses `--` line comments
+- Haskell (.hs), Elm (.elm) - uses `--` line comments
+- Zig (.zig) - uses `//` line comments
+- Clojure (.clj, .cljs), Emacs Lisp (.el) - uses `;;` line comments
+- Erlang (.erl) - uses `%` line comments
+- Elixir (.ex, .exs), Nim (.nim), R (.r, .R)
+- Shell (.sh, .bash, .zsh, .fish), PowerShell (.ps1)
+- Config (.yaml, .yml, .toml, .tf, .dockerfile)
+- CSS (.css, .scss, .less)
+- HTML (.html), Vue (.vue), Svelte (.svelte) - uses `<!-- -->` comments
 
 ## Usage
 

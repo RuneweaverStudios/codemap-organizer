@@ -105,6 +105,28 @@ Last Updated: 2026-03-24
 //!
 ```
 
+### Ruby
+```ruby
+# Path: /absolute/path/to/file.rb
+# Module: module/submodule/component
+# Purpose: One-line description
+# Dependencies: [external-package], [internal/module]
+# Related: /path/to/related.rb, /another/file.rb
+# Keywords: searchable terms, for AI navigation
+# Last Updated: 2026-03-24
+```
+
+### Lua / SQL / Haskell
+```lua
+-- Path: /absolute/path/to/file.lua
+-- Module: module/submodule/component
+-- Purpose: One-line description
+-- Dependencies: [external-package], [internal/module]
+-- Related: /path/to/related.lua
+-- Keywords: searchable terms, for AI navigation
+-- Last Updated: 2026-03-24
+```
+
 ## CODEMAP Format
 
 ```markdown
