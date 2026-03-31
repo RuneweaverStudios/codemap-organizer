@@ -1,42 +1,19 @@
 # /organize-code
 
-Add structured file headers to all code files AND regenerate CODEMAPS.
+Scan a project and generate navigable CODEMAP index files.
 
 ## What It Does
 
-1. **Adds file headers** to all code files:
-   - Path (absolute file location)
-   - Module (hierarchy within project)
-   - Purpose (one-line description)
-   - Dependencies (external packages and internal modules)
-   - Related files (imports and dependents)
-   - Keywords (searchable terms for AI navigation)
-   - Last Updated timestamp
+Scans all code files in the project and generates `docs/CODEMAPS/` with:
+- `INDEX.md` - Master index listing all areas, file counts, and line counts
+- Area-specific maps (`frontend.md`, `backend.md`, `database.md`, etc.)
 
-2. **Generates CODEMAPS** (same as `/codemap-update`)
-
-## Supported Languages
-
-- TypeScript/JavaScript (.ts, .tsx, .js, .jsx)
-- Python (.py, .pyi)
-- Go (.go)
-- Rust (.rs) - uses `//!` doc comments
-- Java (.java)
-- C/C++ (.c, .cpp, .cc, .h, .hpp)
-- Swift (.swift), Kotlin (.kt, .kts), Dart (.dart)
-- C# (.cs), Scala (.scala), Groovy (.groovy)
-- Ruby (.rb) - uses `#` line comments
-- PHP (.php)
-- Lua (.lua), SQL (.sql) - uses `--` line comments
-- Haskell (.hs), Elm (.elm) - uses `--` line comments
-- Zig (.zig) - uses `//` line comments
-- Clojure (.clj, .cljs), Emacs Lisp (.el) - uses `;;` line comments
-- Erlang (.erl) - uses `%` line comments
-- Elixir (.ex, .exs), Nim (.nim), R (.r, .R)
-- Shell (.sh, .bash, .zsh, .fish), PowerShell (.ps1)
-- Config (.yaml, .yml, .toml, .tf, .dockerfile)
-- CSS (.css, .scss, .less)
-- HTML (.html), Vue (.vue), Svelte (.svelte) - uses `<!-- -->` comments
+Each area map contains:
+- Architecture tree view
+- Key modules table (file, lines, purpose)
+- Entry points
+- External dependencies
+- Related area links
 
 ## Usage
 
@@ -53,67 +30,28 @@ Or specify a directory:
 ## Example Output
 
 ```
-📁 Scanning /path/to/project for code files...
+Generating CODEMAPS for /path/to/project...
 
-Found 47 code files
+Found 143 code files
 
-✓ Added header: src/components/Header.tsx
-✓ Added header: src/services/auth.ts
-✓ Already has header: src/utils/helpers.ts
-...
+Generating frontend.md (45 files, 3200 lines)
+Generating backend.md (62 files, 8400 lines)
+Generating database.md (12 files, 1100 lines)
+Generating workers.md (8 files, 600 lines)
+Skipping integrations (no files)
 
-✅ Processed 45/47 files
-
-🗺️  Generating CODEMAPS for /path/to/project...
-...
-```
-
-## Header Format
-
-### TypeScript/JavaScript
-```typescript
-/*
- * Path: /absolute/path/to/file.ts
- * Module: module/submodule/component
- * Purpose: One-line description
- * Dependencies: [external-package], [internal/module]
- * Related: /path/to/related.ts, /another/file.ts
- * Keywords: searchable terms, for AI navigation
- * Last Updated: 2026-03-24
- */
-```
-
-### Python
-```python
-"""
-Path: /absolute/path/to/file.py
-Module: module/submodule/component
-Purpose: One-line description
-Dependencies: [external-package], [internal/module]
-Related: /path/to/related.py, /another/file.py
-Keywords: searchable terms, for AI navigation
-Last Updated: 2026-03-24
-"""
+Generated CODEMAPS in docs/CODEMAPS/
 ```
 
 ## When to Run
 
-- First time setting up the skill
-- After creating new files
-- After major refactoring
+- First time working with a new codebase
+- After major refactoring or adding new modules
 - When AI seems to have trouble finding code
+- Before handing off a project
 
 ## Notes
 
-- **Skips files with existing headers**: Won't duplicate headers
-- **Non-destructive**: Adds headers before existing content
-- **Preserves existing comments**: Doesn't remove other documentation
-- **Smart detection**: Infers purpose from filename and code patterns
-- **Dependency extraction**: Scans import statements to find dependencies
-
-## Tips
-
-- Run this before asking Claude to navigate unfamiliar codebases
-- The Keywords field helps AI find files by searching for terms
-- The Related field shows import relationships
-- Combined with CODEMAPS, creates full navigation system
+- **Non-destructive**: Only creates files in `docs/CODEMAPS/`, never modifies source code
+- **Smart classification**: Files are classified into areas by path patterns and extensions
+- **Token-efficient**: Each codemap targets <500 tokens so AI can read them cheaply
